@@ -1,0 +1,37 @@
+<resultMap id="BaseResultMap" type="com.powernode.api.model.BankCard">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="uid" jdbcType="INTEGER" property="uid" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="account_balance" jdbcType="DECIMAL" property="accountBalance" />
+</resultMap>
+<sql id="Base_Column_List">
+id, uid, password，account_balance
+</sql>
+        <!--  /* 通过 uid 获取用户的账户信息*/-->
+<select id="selectByUid" resultMap="BaseResultMap">
+select <include refid="Base_Column_List"> </include>
+from  u_Bank_card
+where uid = #{uid}
+</select>
+        <!-- /*通过uid 检查用户资金 加了悲观锁*/-->
+<select id="selectByUidForUpdate" resultMap="BaseResultMap">
+select <include refid="Base_Column_List"> </include>
+from  u_Bank_card
+where uid = #{uid}
+for update
+</select>
+
+        <!--  提现   用户钱包金钱提现到银行卡-->
+<update id="updateAvailableMoneyByRecharge">
+update u_Bank_card
+set account_balance = account_balance + #{rechargeMoney}
+where uid = #{uid}
+</update>
+
+
+        <!--充值  根据uid 扣除银行卡的资金-->
+<update id="reduceAvailableMoney">
+update u_Bank_card
+set  available_money = account_balance - #{bidMoney}
+where uid=#{uid} and (available_money-#{bidMoney})>=0
+</update>

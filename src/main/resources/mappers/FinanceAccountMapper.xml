@@ -1,0 +1,36 @@
+<resultMap id="BaseResultMap" type="com.powernode.api.model.FinanceAccount">
+  <id column="id" jdbcType="INTEGER" property="id" />
+  <result column="uid" jdbcType="INTEGER" property="uid" />
+  <result column="available_money" jdbcType="DECIMAL" property="availableMoney" />
+</resultMap>
+  <sql id="Base_Column_List">
+    id, uid, available_money
+  </sql>
+<!--  /* 通过 uid 获取用户的账户信息*/-->
+  <select id="selectByUid" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"> </include>
+    from  u_finance_account
+    where uid = #{uid}
+  </select>
+<!-- /*通过uid 检查用户资金 加了悲观锁*/-->
+  <select id="selectByUidForUpdate" resultMap="BaseResultMap">
+    select <include refid="Base_Column_List"> </include>
+    from  u_finance_account
+    where uid = #{uid}
+    for update
+  </select>
+
+<!--  /*根据  uid 扣除账户购买的资金*/-->
+  <update id="reduceAvailableMoney">
+    update u_finance_account
+    set available_money = available_money - #{bidMoney}
+    where uid = #{uid}  and (available_money-#{bidMoney})>=0
+  </update>
+
+
+  <!--退款  用户用的账户余额 加钱-->
+  <update id="updateAvailableMoneyByRecharge">
+    update u_finance_account
+    set  available_money = available_money+#{rechargeMoney}
+    where uid=#{uid}
+  </update>
